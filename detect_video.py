@@ -180,3 +180,6 @@ if __name__ == '__main__':
         app.run(main)
     except SystemExit:
         pass
+        
+
+# python detect_video.py --weights ./checkpoints/yolov4-tiny-416 --size 416 --model yolov4 --video "rtsp://admin:a123456789@192.168.0.217" --tiny
