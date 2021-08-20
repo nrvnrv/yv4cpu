@@ -1,3 +1,7 @@
+РАСПОЗНАВАНИЕ НА ПРОЦЕССОРЕ
+установить все что есть в требованиях, запустить detect_video
+
+
 # yolov4-custom-functions
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
 
