@@ -1,3 +1,12 @@
+**РАСПОЗНАВАНИЕ НА ПРОЦЕССОРЕ**
+
+Установить все что есть в требованиях, запустить detect_video
+
+**Есть возможность распознавания на gpu**
+
+Для этого - установка из файла требования с gpu
+
+
 # yolov4-custom-functions
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
 
