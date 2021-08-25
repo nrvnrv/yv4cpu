@@ -18,7 +18,7 @@ class Detect:
         with open('pen/pen.names', 'rt') as f:
             self.class_names = f.read().rstrip('\n').split('\n')
             
-        self.vs = WebcamVideoStream('rtsp://admin:a123456789@192.168.0.217').start()
+        self.vs = WebcamVideoStream(0).start()
         frame = self.vs.read()
         self.net = cv.dnn_DetectionModel('pen/yv4t.cfg',
                                          'pen/yv4t_last.weights')
