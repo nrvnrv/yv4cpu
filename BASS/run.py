@@ -1,14 +1,25 @@
 import time
 from modules.Detect import Detect
 
-start_time = time.time()
+# added
+import uvicorn, asyncio, cv2
+from vidgear.gears.asyncio import WebGear
+from vidgear.gears.asyncio.helper import reducer
 
-# int:Net size:256-512
-# bool:Test from image
+web = WebGear(logging=True)#
+
+start_time = time.time()
 detect = Detect(256).start()
+
+web.config["generator"] = detect.my_frame_producer#
+uvicorn.run(web(), host="localhost", port=8000)#
+
+
+
 
 print('Init finished')
 print("--- took %s seconds ---" % (time.time() - start_time))
 print()
+web.shutdown()#
 detect.enable()
 time.sleep(1000)

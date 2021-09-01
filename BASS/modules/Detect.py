@@ -10,15 +10,20 @@ from threading import Thread
 import os.path
 
 
+import uvicorn, asyncio, cv2
+from vidgear.gears.asyncio import WebGear
+from vidgear.gears.asyncio.helper import reducer
+
+
 class Detect:
     def __init__(self, net_size=0):
-        self.thread = Thread(target=self.detect_data, daemon=True, args=())
+        self.thread = Thread(target=self.my_frame_producer, daemon=True, args=())
         self.started = False
         self.enabled = False
         with open('pen/pen.names', 'rt') as f:
             self.class_names = f.read().rstrip('\n').split('\n')
             
-        self.vs = WebcamVideoStream('rtsp://admin:a123456789@192.168.0.217').start()
+        self.vs = WebcamVideoStream(0).start()
         frame = self.vs.read()
         self.net = cv.dnn_DetectionModel('pen/yv4t.cfg',
                                          'pen/yv4t_last.weights')
@@ -26,6 +31,42 @@ class Detect:
         self.net.setInputScale(1.0 / 127)  # 1.0 / 256 for better accuracy
         self.net.setInputSwapRB(True)
         print('DNN ready;')
+        
+    async def my_frame_producer(self):
+        
+        stream = WebcamVideoStream(0).start()
+        while True:
+            # read frame from provided source
+            frame = stream.read()
+            
+            classes, confidences, boxes = self.net.detect(frame, confThreshold=0.5, nmsThreshold=0.4)
+            if len(boxes) > 0:
+                for classId, confidence, box in zip(classes.flatten(), confidences.flatten(), boxes):
+                    label = '%.2f' % confidence
+                    label = '%s: %s' % (self.class_names[classId], label)
+                    label_size, base_line = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+                    left, top, width, height = box
+                    top = max(top, label_size[1])
+                    cv.rectangle(frame, box, color=(0, 255, 0), thickness=3)
+                    cv.rectangle(frame, (left, top - label_size[1]), (left + label_size[0], top + base_line),
+                                 (255, 255, 255),
+                                 cv.FILLED)
+                    cv.putText(frame, label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0))
+
+            frame = cv.resize(frame, (1200, 700))
+            cv.imshow('Detect', frame)
+
+            if cv.waitKey(27) == 27:
+                cv.destroyAllWindows()
+                self.enabled = False
+                sys.exit(0)
+
+            frame = await reducer(frame, percentage=30)
+            encodedImage = cv.imencode(".jpg", frame)[1].tobytes()
+            yield (b"--frame\r\nContent-Type:video/jpeg2000\r\n\r\n" + encodedImage + b"\r\n")
+            await asyncio.sleep(0.00001)
+        # close stream
+        stream.release()
 
     def detect_data(self):
         while self.started:
