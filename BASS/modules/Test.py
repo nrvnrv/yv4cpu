@@ -2,7 +2,7 @@ import cv2
 
 from WebcamVideoStream import WebcamVideoStream
 
-vs = WebcamVideoStream('rtsp://admin:a123456789@192.168.0.217').start()
+vs = WebcamVideoStream(0).start()
 while True :
     frame = vs.read()
     cv2.imshow('webcam', frame)
