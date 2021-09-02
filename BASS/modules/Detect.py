@@ -20,13 +20,13 @@ class Detect:
         self.thread = Thread(target=self.my_frame_producer, daemon=True, args=())
         self.started = False
         self.enabled = False
-        with open('pen/pen.names', 'rt') as f:
+        with open('jacket/obj.names', 'rt') as f:
             self.class_names = f.read().rstrip('\n').split('\n')
             
-        self.vs = WebcamVideoStream('rtsp://admin:a123456789@192.168.0.217').start()
+        self.vs = WebcamVideoStream(0).start()
         frame = self.vs.read()
-        self.net = cv.dnn_DetectionModel('pen/yv4t.cfg',
-                                         'pen/yv4t_last.weights')
+        self.net = cv.dnn_DetectionModel('jacket/v4-tiny/yolov4-tiny.cfg',
+                                         'jacket/v4-tiny/yolov4-tiny_6000.weights')
         self.net.setInputSize(net_size, net_size)  # 416, 416 for better accuracy, set in run.py
         self.net.setInputScale(1.0 / 127)  # 1.0 / 256 for better accuracy
         self.net.setInputSwapRB(True)
@@ -39,7 +39,7 @@ class Detect:
             # read frame from provided source
             frame = stream.read()
             
-            classes, confidences, boxes = self.net.detect(frame, confThreshold=0.5, nmsThreshold=0.4)
+            classes, confidences, boxes = self.net.detect(frame, confThreshold=0.3, nmsThreshold=0.4)
             if len(boxes) > 0:
                 for classId, confidence, box in zip(classes.flatten(), confidences.flatten(), boxes):
                     label = '%.2f' % confidence
